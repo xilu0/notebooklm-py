@@ -401,9 +401,9 @@ def register_session_commands(cli):
     )
     @click.option(
         "--browser",
-        type=click.Choice(["chromium", "msedge"], case_sensitive=False),
+        type=click.Choice(["chromium", "msedge", "chrome"], case_sensitive=False),
         default="chromium",
-        help="Browser to use for login (default: chromium). Use 'msedge' for Microsoft Edge.",
+        help="Browser to use for login (default: chromium). Use 'msedge' for Microsoft Edge, 'chrome' for Google Chrome.",
     )
     @click.option(
         "--browser-cookies",
@@ -490,7 +490,7 @@ def register_session_commands(cli):
             from playwright.sync_api import Error as PlaywrightError
             from playwright.sync_api import sync_playwright
         except ImportError:
-            if browser == "msedge":
+            if browser in ["msedge", "chrome"]:
                 install_hint = "  pip install notebooklm[browser]"
             else:
                 install_hint = "  pip install notebooklm[browser]\n  playwright install chromium"
@@ -504,7 +504,12 @@ def register_session_commands(cli):
         from ..paths import resolve_profile
 
         profile_name = resolve_profile()
-        browser_label = "Microsoft Edge" if browser == "msedge" else "Chromium"
+        if browser == "msedge":
+            browser_label = "Microsoft Edge"
+        elif browser == "chrome":
+            browser_label = "Google Chrome"
+        else:
+            browser_label = "Chromium"
         console.print(f"[dim]Profile: {profile_name}[/dim]")
         console.print(f"[yellow]Opening {browser_label} for Google login...[/yellow]")
         console.print(f"[dim]Using persistent profile: {browser_profile}[/dim]")
@@ -523,6 +528,8 @@ def register_session_commands(cli):
             }
             if browser == "msedge":
                 launch_kwargs["channel"] = "msedge"
+            elif browser == "chrome":
+                launch_kwargs["channel"] = "chrome"
 
             context = None
             try:
